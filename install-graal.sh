@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-GRAAL_OS=linux
-#GRAAL_OS=darwin
-#GRAAL_OS=windows
+# control OS by setting environment variable OS_NAME before invoking this script
+
+GRAAL_OS="$OS_NAME"
+if [[ "$GRAAL_OS" == "" ]]; then
+  echo '$OS_NAME is not set. Using default $OS_NAME=linux'
+  GRAAL_OS=linux
+  #GRAAL_OS=darwin
+  #GRAAL_OS=windows
+fi
 
 GRAAL_VERSION=19.2.1
 CACHE_DIR=~/.m2/caches/info.picocli.graal

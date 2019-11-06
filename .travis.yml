@@ -1,0 +1,49 @@
+language: java
+jdk:
+  - openjdk11
+
+#os:
+#  - linux
+#  - osx
+#  - windows
+
+jobs:
+  include:
+    - os: linux
+      env: OS_NAME=linux
+    - os: osx
+      env: OS_NAME=darwin
+    - os: windows
+      language: shell
+      env: OS_NAME=windows
+install:
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277; fi
+
+before_script:
+  - chmod +x mvnw
+  - chmod +x install-graal.sh
+script:
+  - if [ $TRAVIS_OS_NAME  = windows ]; then install-graal.cmd ; fi
+  - if [ $TRAVIS_OS_NAME != windows ]; then install-graal.sh  ; fi
+  - if [ $TRAVIS_OS_NAME  = windows ]; then mvnw clean verify ; fi
+  - if [ $TRAVIS_OS_NAME != windows ]; then ./mvnw -DbuildArgs=--no-server clean verify ; fi
+  - if [ $TRAVIS_OS_NAME  = windows ]; then "$JAVA_HOME/bin/jar.exe" -cMvf target/checksum-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo.exe ; fi
+  - if [ $TRAVIS_OS_NAME != windows ]; then zip -v target/picocli-native-image-maven-demo-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo ; fi
+
+# Deploy the resulting artifact to GitHub Releases
+#deploy:
+#  provider: releases
+#  api_key: "GITHUB OAUTH TOKEN"
+#  file: build/graal/checksum-$TRAVIS_OS_NAME.zip
+#  skip_cleanup: true
+#  on:
+#    tags: true
+
+# avoid uploading the cache after every build
+#before_cache:
+#  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+#  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+#cache:
+#  directories:
+#    - $HOME/.gradle/caches/
+#    - $HOME/.gradle/wrapper/

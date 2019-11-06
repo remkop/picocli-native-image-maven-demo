@@ -51,7 +51,8 @@
         <configuration>
           <imageName>${project.name}</imageName>
           <mainClass>${mainClass}</mainClass>
-          <!--          <buildArgs>-H:+ReportUnsupportedElementsAtRuntime &#45;&#45;allow-incomplete-classpath</buildArgs> (4)-->
+          <buildArgs>--no-server</buildArgs>
+<!--          <buildArgs>-H:+ReportUnsupportedElementsAtRuntime &#45;&#45;allow-incomplete-classpath</buildArgs>-->
         </configuration>
         <executions>
           <execution>
@@ -94,10 +95,27 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.2</version>
+        <configuration>
+          <excludedGroups>native-image</excludedGroups>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.22.2</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <groups>native-image</groups>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

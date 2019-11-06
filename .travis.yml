@@ -23,9 +23,9 @@ before_script:
   - chmod +x mvnw
   - chmod +x install-graal.sh
 script:
-  - if [ $TRAVIS_OS_NAME  = windows ]; then install-graal.cmd ; fi
-  - if [ $TRAVIS_OS_NAME != windows ]; then install-graal.sh  ; fi
-  - if [ $TRAVIS_OS_NAME  = windows ]; then mvnw clean verify ; fi
+  - if [ $TRAVIS_OS_NAME  = windows ]; then ./install-graal.cmd ; fi
+  - if [ $TRAVIS_OS_NAME != windows ]; then ./install-graal.sh  ; fi
+  - if [ $TRAVIS_OS_NAME  = windows ]; then ./mvnw clean verify ; fi
   - if [ $TRAVIS_OS_NAME != windows ]; then ./mvnw -DbuildArgs=--no-server clean verify ; fi
   - if [ $TRAVIS_OS_NAME  = windows ]; then "$JAVA_HOME/bin/jar.exe" -cMvf target/checksum-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo.exe ; fi
   - if [ $TRAVIS_OS_NAME != windows ]; then zip -v target/picocli-native-image-maven-demo-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo ; fi

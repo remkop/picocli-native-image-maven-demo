@@ -1,0 +1,93 @@
+= Building native CLI apps in Java with picocli and GraalVM (Maven version)
+
+//image:https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true"[Appveyor Build Status,link=https://ci.appveyor.com/project/remkop/picocli-native-image-demo]
+//image:https://github.com/remkop/picocli-native-image-demo/workflows/Java%20CI/badge.svg[GitHub Action Build Status,link=https://github.com/remkop/picocli-native-image-demo/actions]
+//image:https://travis-ci.org/remkop/picocli-native-image-demo.svg?branch=master[Travis Build Status, link=https://travis-ci.org/remkop/picocli-native-image-demo]
+
+Examples of using Maven to create GraalVM native images for picocli-based applications
+
+CAUTION: Below is work in progress
+
+image::https://picocli.info/images/exe-picocli-on-graalvm.png[]
+
+== Introduction
+
+This project shows examples of creating native images for picocli-based Java command line applications that can run as standalone executables on Windows, Linux and MacOS without requiring a JVM to be installed.
+
+This project uses Maven, see the https://github.com/remkop/picocli-native-image-demo[picocli-native-image-demo] project for an example that uses Gradle.
+
+== Installing GraalVM
+
+This project provides a `install-graal.sh` script to install GraalVM for Linux,
+and a `install-graal.bat` Windows version.
+The Windows version will also attempt install the `windows-sdk-7.1` toolchain via Chocolatey if it does not exist.
+
+The install script will cache the download and installation in `~/.m2/caches/info.picocli.graal`, so that subsequent invocations can reuse the previously downloaded GraalVM installation.
+
+The script will set the `JAVA_HOME` variable to the GraalVM installation directory.
+Always run the `install-graal` script before running the `mvnw clean verify` build with Maven.
+
+== Install Compiler Toolchain
+
+The setup for your Continuous Integration environment needs to have the toolchain to compile C/C++ code.
+
+=== Linux and MacOS Compiler Toolchain
+
+For compilation `native-image` depends on the local toolchain, so on Linux and MacOS we need `glibc-devel`, `zlib-devel` (header files for the C library and zlib) and `gcc` to be available on our system. The below is not required with GitHub Actions, since these are already available:
+
+On Linux: `sudo dnf install gcc glibc-devel zlib-devel` or `sudo apt-get install build-essential libz-dev`.
+
+On macOS, execute `xcode-select --install`.
+
+=== Windows Compiler Toolchain
+
+GraalVM https://github.com/oracle/graal/issues/1258[needs] the https://www.microsoft.com/en-us/download/details.aspx?id=8442[Microsoft Windows SDK for Windows 7 and .NET Framework 4] as well as the https://stackoverflow.com/a/45784634/873282[C compilers from KB2519277].
+
+The `install-graal.bat` script will attempt to install the `windows-sdk-7.1` toolchain if it does not exist, but you may need to do this step manually.
+
+You can install these using https://chocolatey.org/docs/installation[chocolatey]:
+
+----
+choco install windows-sdk-7.1 kb2519277
+----
+
+Then (from the `cmd` prompt), activate the sdk-7.1 environment:
+
+----
+call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd"
+----
+
+This starts a new Command Prompt, with the sdk-7.1 environment enabled. All subsequent commands must be run in this Command Prompt window.
+
+
+
+== Maven
+
+The Graal team https://medium.com/graalvm/simplifying-native-image-generation-with-maven-plugin-and-embeddable-configuration-d5b283b92f57[publishes]
+a Maven plugin called `native-image-maven-plugin` that can invoke the `native-image` generation tool.
+This project uses this plugin for generating a native image.
+
+The `native-image-maven-plugin` Maven plugin is not as powerful as the Palantir Gradle-Graal plugin,
+in that it requires GraalVM to be installed; it cannot download and install GraalVM for you.
+
+This project provides `install-graal` scripts that take care of the GraalVM installation.
+Always run the `install-graal` script before running the `mvnw clean verify` build with Maven.
+The script will set the `JAVA_HOME` variable to the GraalVM installation directory.
+On Windows, this script will activate the sdk-7.1 environment.
+
+You can pass additional arguments to the underlying `native-image` generator command with the `buildArgs` system property.
+On Linux, you may want to run the maven build with:
+
+[source,bash]
+----
+./mvnw -DbuildArgs=--no-server clean verify
+----
+
+== Testing Native Images
+
+This project uses JUnit 5 for testing.
+It has a unit test that is run before the JAR file is created, and an integration test that is run after the native image is generated.
+
+The integration test is tagged with `@org.junit.jupiter.api.Tag("native-image")`,
+and this tag is used in the Maven Surefire and Maven Failsafe plugins to ensure that only the unit tests run before the JAR is created,
+and only the integration tests are run after the native image has been generated.

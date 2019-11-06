@@ -26,6 +26,9 @@ else
 fi
 
 echo "Using JAVA_HOME=$CACHE_DIR/graalvm-ce-$GRAAL_VERSION"
-set JAVA_HOME="$CACHE_DIR/graalvm-ce-$GRAAL_VERSION"
+JAVA_HOME="$CACHE_DIR/graalvm-ce-$GRAAL_VERSION"
+"${JAVA_HOME}/bin/java" -version
+
+echo "You can now run the build with: ./mvnw -DbuildArgs=--no-server clean verify"
 
 #./mvnw clean verify

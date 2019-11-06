@@ -51,7 +51,7 @@
         <configuration>
           <imageName>${project.name}</imageName>
           <mainClass>${mainClass}</mainClass>
-          <buildArgs>--no-server</buildArgs>
+          <buildArgs>${buildArgs}</buildArgs>
 <!--          <buildArgs>-H:+ReportUnsupportedElementsAtRuntime &#45;&#45;allow-incomplete-classpath</buildArgs>-->
         </configuration>
         <executions>

@@ -1,5 +1,6 @@
 package picocli.nativeimage.demo;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -27,6 +28,7 @@ class CheckSumImageTest {
         return tempFile;
     }
 
+    @Tag("native-image")
 //    @Test
 //    public void testUsageHelp() throws IOException, InterruptedException {
 //        Process process = new ProcessBuilder(executable, "--help").start();

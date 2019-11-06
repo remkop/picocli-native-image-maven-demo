@@ -5,12 +5,12 @@ jdk:
 jobs:
   include:
     - os: linux
-      env: BUILD_ARGS=--no-server
+#      env: BUILD_ARGS=--no-server
     - os: osx
-      env: BUILD_ARGS=--no-server
+#      env: BUILD_ARGS=--no-server
     - os: windows
       language: shell
-      env: BUILD_ARGS=
+#      env: BUILD_ARGS=
 install:
   - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277 zip unzip; fi
 
@@ -22,7 +22,7 @@ script:
   - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
   - source "/home/travis/.sdkman/bin/sdkman-init.sh"
   - sdk install java 19.2.1-grl
-  - unset JAVA_HOME
+  - if [ $TRAVIS_OS_NAME != windows ]; then unset JAVA_HOME ; fi
   - java -version
   - ./mvnw --version; ./mvnw -DbuildArgs=${BUILD_ARGS} clean verify
   - if [ $TRAVIS_OS_NAME  = windows ]; then "$JAVA_HOME/bin/jar.exe" -cMvf target/checksum-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo.exe ; fi

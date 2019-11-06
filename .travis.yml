@@ -12,7 +12,7 @@ jobs:
       language: shell
       env: BUILD_ARGS=
 install:
-  - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277; fi
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277 zip unzip; fi
 
 before_script:
   - chmod +x mvnw
@@ -21,7 +21,7 @@ script:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
   - source "/home/travis/.sdkman/bin/sdkman-init.sh"
-  - sdk install java 19.2.1-grl
+  - sdk install java 19.1.1-grl
   - java -version
   - ./mvnw --version; ./mvnw -DbuildArgs=${BUILD_ARGS} clean verify
   - if [ $TRAVIS_OS_NAME  = windows ]; then "$JAVA_HOME/bin/jar.exe" -cMvf target/checksum-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo.exe ; fi

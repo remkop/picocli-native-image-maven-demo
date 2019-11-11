@@ -13,7 +13,7 @@
     <mainClass>picocli.nativeimage.demo.CheckSum</mainClass>
     <graal.version>19.2.1</graal.version>
     <picocli.version>4.0.4</picocli.version>
-    <picocli-jansi-graalvm.version>1.0.0</picocli-jansi-graalvm.version>
+    <picocli-jansi-graalvm.version>1.1.0</picocli-jansi-graalvm.version>
     <jansi.version>1.18</jansi.version>
     <junit.version>5.5.2</junit.version>
 

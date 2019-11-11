@@ -24,10 +24,10 @@ class CheckSum implements Callable<Integer> {
     private String algorithm = "MD5";
 
     public static void main(String... args) {
-        boolean windows = System.getProperty("os.name").toLowerCase().startsWith("win");
-        if (windows) { AnsiConsole.systemInstall(); }
-        int exitCode = new CommandLine(new CheckSum()).execute(args);
-        if (windows) { AnsiConsole.systemUninstall(); }
+        int exitCode;
+        try (AnsiConsole ansi = AnsiConsole.windowsInstall()) {
+            exitCode = new CommandLine(new CheckSum()).execute(args);
+        }
         System.exit(exitCode);
     }
 

@@ -16,6 +16,52 @@ This project shows examples of creating native images for picocli-based Java com
 
 This project uses Maven, see the https://github.com/remkop/picocli-native-image-demo[picocli-native-image-demo] project for an example that uses Gradle.
 
+
+== Artifacts
+
+=== CheckSum
+
+The main project builds a `checksum` executable.
+This is a picocli-based command line application.
+On Windows it uses Jansi to show colors on the console and the `picocli-jansi-graalvm` library to enable the Jansi library for GraalVM native applications.
+
+//=== HTTPS
+//
+//There is also a `https` subproject that builds a `demo` native executable with `https-client` and `https-server` subcommands to demonstrate HTTPS TSL client and server applications.
+//The server uses a self-signed certificate.
+//
+//The https subproject also demonstrates that it is possible to build native TSL applications with GraalVM that work without the `libsunec.so` or `sunec.dll` library.
+//
+//This can be achieved by specifying a `-J-Djava.security.properties=/full/path/to/java.security.overrides` option when building the native image.
+//The specified `java.security.overrides` file contains an entry for `security.provider.3` with a non-existing value.
+//This disables the SunEC elliptical curve encryption provider, which would have required the `libsunec.so` or `sunec.dll` native library.
+
+== Windows Note
+
+The Windows executables created with GraalVM depend on the `msvcr100.dll` native library.
+When distributing your native Windows executable you may want to include `msvcr100.dll` (from `C:\Windows\System32`) or ask your users to get it from Microsoft by installing the VS C++ Redistributable 2010.
+
+
+== Testing Native Images
+
+This project uses JUnit 5 for testing.
+It has a unit test that is run before the JAR file is created, and an integration test that is run after the native image is generated.
+
+The integration test is tagged with `@org.junit.jupiter.api.Tag("native-image")`,
+and this tag is used in the Maven Surefire and Maven Failsafe plugins to ensure that only the unit tests run before the JAR is created,
+and only the integration tests are run after the native image has been generated.
+
+
+== Cross Compilation
+
+GraalVM does not have cross-compile support for native images https://github.com/oracle/graal/issues/407[yet], so at the moment you need to compile on Windows to get a Windows executable, compile on Linux to get a Linux executable, and on MacOS to get a MacOS executable.
+
+This project shows how to do this with
+//a Continuous Integration setup, using GitHub Actions, AppVeyor and
+TravisCI.
+//The current setup creates Linux and MacOS executables with GitHub Actions, and a Windows executable on AppVeyor and TravisCI.
+The current setup creates Linux, MacOS and Windows executables on TravisCI.
+
 == Installing GraalVM
 
 This project provides a `install-graal.sh` script to install GraalVM for Linux,
@@ -27,7 +73,7 @@ The install script will cache the download and installation in `~/.m2/caches/inf
 The script will set the `JAVA_HOME` variable to the GraalVM installation directory.
 Always run the `install-graal` script before running the `mvnw clean verify` build with Maven.
 
-== Alternative: SDKMAN!
+=== Alternative: SDKMAN!
 
 An alternative for Unix-based systems is to use the bash-based https://sdkman.io/[SDKMAN!] to install and manage the GraalVM installation.
 
@@ -35,6 +81,37 @@ Windows Git Bash users may need to download `zip`, which is not included by Wind
 To resolve this, go to https://sourceforge.net/projects/gnuwin32/files/ and find zip in the list.
 Download `zip-3.0-bin.zip` and extract zip.exe in the bin folder. Copy it to *c:\Program Files\Git\usr\bin*.
 Now run the SDKMan install script again.
+
+
+== Install Compiler Toolchain
+
+The setup for your Continuous Integration environment needs to have a JDK, and the toolchain to compile C/C++ code.
+
+=== Linux and MacOS Compiler Toolchain
+
+For compilation `native-image` depends on the local toolchain, so on Linux and MacOS we need `glibc-devel`, `zlib-devel` (header files for the C library and zlib) and `gcc` to be available on our system. The below is not required with GitHub Actions, since these are already available:
+
+On Linux: `sudo dnf install gcc glibc-devel zlib-devel` or `sudo apt-get install build-essential libz-dev`.
+
+On macOS, execute `xcode-select --install`.
+
+=== Windows Compiler Toolchain
+
+GraalVM https://github.com/oracle/graal/issues/1258[needs] the https://www.microsoft.com/en-us/download/details.aspx?id=8442[Microsoft Windows SDK for Windows 7 and .NET Framework 4] as well as the https://stackoverflow.com/a/45784634/873282[C compilers from KB2519277].
+
+You can install these using https://chocolatey.org/docs/installation[chocolatey]:
+
+----
+choco install windows-sdk-7.1 kb2519277
+----
+
+Then (from the `cmd` prompt), activate the sdk-7.1 environment:
+
+----
+call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd"
+----
+
+This starts a new Command Prompt, with the sdk-7.1 environment enabled. All subsequent commands must be run in this Command Prompt window.
 
 
 
@@ -60,47 +137,4 @@ On Linux, you may want to run the maven build with:
 ./mvnw -DbuildArgs=--no-server clean verify
 ----
 
-== Testing Native Images
-
-This project uses JUnit 5 for testing.
-It has a unit test that is run before the JAR file is created, and an integration test that is run after the native image is generated.
-
-The integration test is tagged with `@org.junit.jupiter.api.Tag("native-image")`,
-and this tag is used in the Maven Surefire and Maven Failsafe plugins to ensure that only the unit tests run before the JAR is created,
-and only the integration tests are run after the native image has been generated.
-
-
-//== Install Compiler Toolchain
-//
-//The setup for your Continuous Integration environment needs to have the toolchain to compile C/C++ code.
-//
-//
-//=== Linux and MacOS Compiler Toolchain
-//
-//For compilation `native-image` depends on the local toolchain, so on Linux and MacOS we need `glibc-devel`, `zlib-devel` (header files for the C library and zlib) and `gcc` to be available on our system. The below is not required with GitHub Actions, since these are already available:
-//
-//On Linux: `sudo dnf install gcc glibc-devel zlib-devel` or `sudo apt-get install build-essential libz-dev`.
-//
-//On macOS, execute `xcode-select --install`.
-//
-//=== Windows Compiler Toolchain
-//
-//GraalVM https://github.com/oracle/graal/issues/1258[needs] the https://www.microsoft.com/en-us/download/details.aspx?id=8442[Microsoft Windows SDK for Windows 7 and .NET Framework 4] as well as the https://stackoverflow.com/a/45784634/873282[C compilers from KB2519277].
-//
-//The `install-graal.bat` script will attempt to install the `windows-sdk-7.1` toolchain if it does not exist, but you may need to do this step manually.
-//
-//You can install these using https://chocolatey.org/docs/installation[chocolatey]:
-//
-//----
-//choco install windows-sdk-7.1 kb2519277
-//----
-//
-//Then (from the `cmd` prompt), activate the sdk-7.1 environment:
-//
-//----
-//call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd"
-//----
-//
-//This starts a new Command Prompt, with the sdk-7.1 environment enabled. All subsequent commands must be run in this Command Prompt window.
-//
 

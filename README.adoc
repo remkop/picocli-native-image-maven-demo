@@ -2,7 +2,7 @@
 
 //image:https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true"[Appveyor Build Status,link=https://ci.appveyor.com/project/remkop/picocli-native-image-demo]
 //image:https://github.com/remkop/picocli-native-image-demo/workflows/Java%20CI/badge.svg[GitHub Action Build Status,link=https://github.com/remkop/picocli-native-image-demo/actions]
-//image:https://travis-ci.org/remkop/picocli-native-image-demo.svg?branch=master[Travis Build Status, link=https://travis-ci.org/remkop/picocli-native-image-demo]
+image:https://travis-ci.org/remkop/picocli-native-image-maven-demo.svg?branch=master[Travis Build Status, link=https://travis-ci.org/remkop/picocli-native-image-maven-demo]
 
 Examples of using Maven to create GraalVM native images for picocli-based applications
 
@@ -26,6 +26,17 @@ The install script will cache the download and installation in `~/.m2/caches/inf
 
 The script will set the `JAVA_HOME` variable to the GraalVM installation directory.
 Always run the `install-graal` script before running the `mvnw clean verify` build with Maven.
+
+== Alternative: SDKMAN!
+
+An alternative for Unix-based systems is to use the bash-based https://sdkman.io/[SDKMAN!] to install and manage the GraalVM installation.
+
+Windows Git Bash users may need to download `zip`, which is not included by Windows Git Bash by default.
+To resolve this, go to https://sourceforge.net/projects/gnuwin32/files/ and find zip in the list.
+Download `zip-3.0-bin.zip` and extract zip.exe in the bin folder. Copy it to *c:\Program Files\Git\usr\bin*.
+Now run the SDKMan install script again.
+
+
 
 == Maven
 

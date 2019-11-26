@@ -11,8 +11,8 @@
 
   <properties>
     <mainClass>picocli.nativeimage.demo.CheckSum</mainClass>
-    <graal.version>19.2.1</graal.version>
-    <picocli.version>4.0.4</picocli.version>
+    <graal.version>19.3.0</graal.version>
+    <picocli.version>4.1.1</picocli.version>
     <picocli-jansi-graalvm.version>1.1.0</picocli-jansi-graalvm.version>
     <jansi.version>1.18</jansi.version>
     <junit.version>5.5.2</junit.version>
@@ -45,7 +45,7 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>com.oracle.substratevm</groupId>
+        <groupId>org.graalvm.nativeimage</groupId>
         <artifactId>native-image-maven-plugin</artifactId>
         <version>${graal.version}</version>
         <configuration>
@@ -122,7 +122,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.oracle.substratevm</groupId>
+      <groupId>org.graalvm.nativeimage</groupId>
       <artifactId>svm</artifactId>
       <version>${graal.version}</version>
       <scope>provided</scope>

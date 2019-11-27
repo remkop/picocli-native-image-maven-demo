@@ -21,7 +21,8 @@ script:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
   - source "/home/travis/.sdkman/bin/sdkman-init.sh"
-  - sdk install java 19.2.1-grl
+  - sdk list java
+  - sdk install java 19.3-grl
   - if [ $TRAVIS_OS_NAME != windows ]; then unset JAVA_HOME ; fi
   - java -version
   - ./mvnw --version; ./mvnw -DbuildArgs=${BUILD_ARGS} clean verify

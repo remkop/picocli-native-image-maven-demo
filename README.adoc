@@ -1,5 +1,9 @@
 = Building native CLI apps in Java with picocli and GraalVM (Maven version)
 
+// create variables for some link text used in article to prevent link mangling in PDF
+:ms-cpp-2015-redist: Microsoft Visual C++ 2015 Redistributable Update 3 RC
+:ms-cpp-2010-redist: Microsoft Visual C++ 2010 SP1 Redistributable Package (x64)
+
 //image:https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true"[Appveyor Build Status,link=https://ci.appveyor.com/project/remkop/picocli-native-image-demo]
 //image:https://github.com/remkop/picocli-native-image-demo/workflows/Java%20CI/badge.svg[GitHub Action Build Status,link=https://github.com/remkop/picocli-native-image-demo/actions]
 image:https://travis-ci.org/remkop/picocli-native-image-maven-demo.svg?branch=master[Travis Build Status, link=https://travis-ci.org/remkop/picocli-native-image-maven-demo]
@@ -66,7 +70,7 @@ The current setup creates Linux, MacOS and Windows executables on TravisCI.
 
 This project provides a `install-graal.sh` script to install GraalVM for Linux,
 and a `install-graal.bat` Windows version.
-The Windows version will also attempt install the `windows-sdk-7.1` toolchain via https://chocolatey.org/docs/installation[chocolatey] if it does not exist.
+The Windows version will also attempt install the Windows Compiler Toolchain for the selected Java version via https://chocolatey.org/docs/installation[chocolatey] if it does not exist.
 
 The install script will cache the download and installation in `~/.m2/caches/info.picocli.graal`, so that subsequent invocations can reuse the previously downloaded GraalVM installation.
 
@@ -95,10 +99,11 @@ On Linux: `sudo dnf install gcc glibc-devel zlib-devel` or `sudo apt-get install
 
 On macOS, execute `xcode-select --install`.
 
-=== Windows Compiler Toolchain
+=== Windows Compiler Toolchain for Java 8
 
-GraalVM https://github.com/oracle/graal/issues/1258[needs] the https://www.microsoft.com/en-us/download/details.aspx?id=8442[Microsoft Windows SDK for Windows 7 and .NET Framework 4] as well as the https://stackoverflow.com/a/45784634/873282[C compilers from KB2519277].
+NOTE: It turns out to be surprisingly difficult to get the below toolchain set up in the various CI build environments. I recommend using the setup for Java 11 instead. Many CI build environments already have visualstudio2017-workload-vctools set up, so all that is needed is to activate the environment.
 
+To build native images using the Java 8 version of GraalVM, you need the https://www.microsoft.com/en-us/download/details.aspx?id=8442[Microsoft Windows SDK for Windows 7 and .NET Framework 4] as well as the https://stackoverflow.com/a/45784634/873282[C compilers from KB2519277].
 You can install these using https://chocolatey.org/docs/installation[chocolatey]:
 
 ----
@@ -112,6 +117,26 @@ call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd"
 ----
 
 This starts a new Command Prompt, with the sdk-7.1 environment enabled. All subsequent commands must be run in this Command Prompt window.
+
+=== Windows Compiler Toolchain for Java 11
+
+To build native images using the Java 11 version of GraalVM (19.3.0 and greater),
+install the Visual C++ Build Tools Workload for Visual Studio 2017 Build Tools
+using https://chocolatey.org/docs/installation[chocolatey]:
+
+[source]
+----
+choco install visualstudio2017-workload-vctools
+----
+
+After installation, set up the environment from the `cmd` prompt with this command:
+
+[source]
+----
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+----
+
+Then run `native-image` in that Command Prompt window.
 
 
 

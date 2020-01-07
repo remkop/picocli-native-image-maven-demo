@@ -4,17 +4,22 @@ pushd "%~dp0"
 
 @REM install GraalVM
 
-set GRAAL_VERSION=19.2.1
-set GRAAL_FILE=graalvm-ce-windows-amd64-%GRAAL_VERSION%.zip
-set GRAAL_URL=https://github.com/oracle/graal/releases/download/vm-%GRAAL_VERSION%
+set JAVA_VERSION=11
+set GRAAL_VERSION=19.3.0.2
+set GRAAL_FILE=graalvm-ce-java%JAVA_VERSION%-windows-amd64-%GRAAL_VERSION%.zip
+set GRAAL_19_2_URL=https://github.com/oracle/graal/releases/download/vm-%GRAAL_VERSION%
+set DOWNLOAD_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-%GRAAL_VERSION%/%GRAAL_FILE%
 set CACHE_DIR=%USERPROFILE%\.m2\caches\info.picocli.graal
 
-if exist "%CACHE_DIR%\graalvm\graalvm-ce-%GRAAL_VERSION%\" GOTO graal_already_installed
-mkdir "%CACHE_DIR%\graalvm\graalvm-ce-%GRAAL_VERSION%\"
-echo Downloading %GRAAL_FILE%. This may take a while.
+set JAVA_HOME=%CACHE_DIR%\graalvm\win\graalvm-ce-java%JAVA_VERSION%-%GRAAL_VERSION%\
+
+
+if exist "%JAVA_HOME%" GOTO graal_already_installed
+mkdir %CACHE_DIR%\graalvm\win
+echo Downloading %DOWNLOAD_URL%. This may take a while.
 pushd "%CACHE_DIR%\"
-powershell -Command "(New-Object Net.WebClient).DownloadFile('%GRAAL_URL%/%GRAAL_FILE%', 'graalvm.zip')"
-powershell -Command "Expand-Archive graalvm.zip graalvm"
+powershell -Command "(New-Object Net.WebClient).DownloadFile('%DOWNLOAD_URL%', '%GRAAL_FILE%')"
+powershell -Command "Expand-Archive %GRAAL_FILE% graalvm\win"
 popd
 goto install-windows-sdk-7.1
 
@@ -23,17 +28,47 @@ echo %CACHE_DIR%\graalvm\graalvm-ce-%GRAAL_VERSION%\ exists: skipping GraalVM do
 
 @REM install windows-sdk-7.1 and C++ compilers if necessary
 :install-windows-sdk-7.1
+if not %JAVA_VERSION%==8 GOTO install-visualstudio2017-workload-vctools
 if not exist "C:\Program Files\Microsoft SDKs\Windows\v7.1\" choco install windows-sdk-7.1 kb2519277
 
 @REM activate the sdk-7.1 environment:
-
+echo Activating the sdk-7.1 environment
 call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd"
-
 @REM The above starts a new Command Prompt, with the sdk-7.1 environment enabled.
 @REM The Maven build command (`mvnw clean verify`) must be run in this Command Prompt window.
+GOTO set-java-home
 
-echo Setting JAVA_HOME=%CACHE_DIR%\graalvm\graalvm-ce-%GRAAL_VERSION%\
-set JAVA_HOME=%CACHE_DIR%\graalvm\graalvm-ce-%GRAAL_VERSION%\
+@REM install Visual C++ build tools workload for Visual Studio 2017 Build Tools if necessary
+:install-visualstudio2017-workload-vctools
+if not exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\" choco install visualstudio2017-workload-vctools
+
+@REM activate the Visual Studio 2017 environment for Java 11
+:activate-visual-studio-2017
+echo Activating the Visual Studio 2017 environment
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+) else (
+  if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" (
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  ) else (
+    if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    )
+  )
+)
+set MAVEN_OPTS=--add-exports=java.base/jdk.internal.module=ALL-UNNAMED
+
+@REM Work around Maven Plugin incompatibility (https://github.com/oracle/graal/issues/1866)
+if not exist %JAVA_HOME%\bin\native-image.exe (
+  @REM Change to GraalVM root dir
+  cd %JAVA_HOME%
+  @REM Build yourself a native-image.exe next to bin\native-image.cmd
+  bin\native-image.cmd -jar lib\graalvm\svm-driver.jar "-H:Path=.\bin"
+)
+GOTO set-java-home
+
+:set-java-home
+echo Setting JAVA_HOME=%JAVA_HOME%
 %JAVA_HOME%\bin\java -version
 
 echo "You can now run the build with: mvnw clean verify"

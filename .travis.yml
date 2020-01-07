@@ -32,7 +32,7 @@ install:
   - echo $JAVA_HOME
   - ls $JAVA_HOME/bin/
   - if [ $TRAVIS_OS_NAME != windows ]; then gu install native-image ; fi
-  - native-image --version
+  - if [ $TRAVIS_OS_NAME != windows ]; then native-image --version ; fi
 
 before_script:
   - chmod +x mvnw

@@ -11,8 +11,8 @@
 
   <properties>
     <mainClass>picocli.nativeimage.demo.CheckSum</mainClass>
-    <graal.version>19.3.0</graal.version>
-    <picocli.version>4.1.1</picocli.version>
+    <graal.version>19.3.0.2</graal.version>
+    <picocli.version>4.1.4</picocli.version>
     <picocli-jansi-graalvm.version>1.1.0</picocli-jansi-graalvm.version>
     <jansi.version>1.18</jansi.version>
     <junit.version>5.5.2</junit.version>
@@ -52,6 +52,7 @@
           <imageName>${project.name}</imageName>
           <mainClass>${mainClass}</mainClass>
           <buildArgs>${buildArgs}</buildArgs>
+<!--          <buildArgs>-J&#45;&#45;add-exports=java.base/jdk.internal.module=ALL-UNNAMED</buildArgs>-->
 <!--          <buildArgs>-H:+ReportUnsupportedElementsAtRuntime &#45;&#45;allow-incomplete-classpath</buildArgs>-->
         </configuration>
         <executions>

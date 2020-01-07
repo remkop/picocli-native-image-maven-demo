@@ -42,8 +42,10 @@ On Windows it uses Jansi to show colors on the console and the `picocli-jansi-gr
 
 == Windows Note
 
-The Windows executables created with GraalVM depend on the `msvcr100.dll` native library.
-When distributing your native Windows executable you may want to include `msvcr100.dll` (from `C:\Windows\System32`) or ask your users to get it from Microsoft by installing the VS C++ Redistributable 2010.
+The Windows executables created with the Java 8 version of GraalVM depend on the `msvcr100.dll` native library.
+Windows executables created with the Java 11 version of GraalVM depend on the `VCRUNTIME140.dll` native library.
+
+You will have to distribute these DLLs with your application, or tell your users to download and install the link:https://www.microsoft.com/en-us/download/details.aspx?id=52685[{ms-cpp-2015-redist}] to get the `VCRUNTIME140.dll` for Java 11-based native images, or link:https://www.microsoft.com/en-hk/download/details.aspx?id=13523[{ms-cpp-2010-redist}] to get the `msvcr100.dll` for Java 8-based native images.
 
 
 == Testing Native Images

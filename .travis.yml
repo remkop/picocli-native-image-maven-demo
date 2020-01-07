@@ -1,30 +1,42 @@
-language: java
-jdk:
-  - openjdk11
+#language: java
+#jdk:
+#  - openjdk11
 
 jobs:
   include:
     - os: linux
-#      env: BUILD_ARGS=--no-server
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
     - os: osx
-#      env: BUILD_ARGS=--no-server
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
     - os: windows
       language: shell
-#      env: BUILD_ARGS=
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
+
+before_install:
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install zip unzip ; fi
+  # adding $HOME/.sdkman to cache would create an empty directory, which interferes with the initial installation
+  - "[[ -d $HOME/.sdkman/ ]] && [[ -d $HOME/.sdkman/bin/ ]] || rm -rf $HOME/.sdkman/"
+  - curl -sL https://get.sdkman.io | bash
+  - mkdir -p "$HOME/.sdkman/etc/"
+  - echo sdkman_auto_answer=true > "$HOME/.sdkman/etc/config"
+  - echo sdkman_auto_selfupdate=true >> "$HOME/.sdkman/etc/config"
+  - ls "$HOME/.sdkman"
+  - "source $HOME/.sdkman/bin/sdkman-init.sh"
+
 install:
-  - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277 zip unzip; fi
+#  - if [ $TRAVIS_OS_NAME = windows ]; then choco install windows-sdk-7.1 kb2519277 zip unzip; fi
+  - sdk current java
+  - echo $JAVA_HOME
+  - sdk current java | grep '19.3.0.2.r11-grl' || sdk install java 19.3.0.2.r11-grl
+  - env
+  - echo $JAVA_HOME
+  - ls $JAVA_HOME/bin/
+  - if [ $TRAVIS_OS_NAME != windows ]; then gu install native-image ; fi
+  - native-image --version
 
 before_script:
   - chmod +x mvnw
 script:
-  - curl -s get.sdkman.io | bash
-  - source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
-  - source "/home/travis/.sdkman/bin/sdkman-init.sh"
-  - sdk list java
-  - sdk install java 19.3.0.r11-grl
-  - echo $JAVA_HOME
-  - if [ $TRAVIS_OS_NAME != windows ]; then unset JAVA_HOME ; fi
   - java -version
   - ./mvnw --version; ./mvnw -DbuildArgs=${BUILD_ARGS} clean verify
   - if [ $TRAVIS_OS_NAME  = windows ]; then "$JAVA_HOME/bin/jar.exe" -cMvf target/checksum-$TRAVIS_OS_NAME.zip target/picocli-native-image-maven-demo.exe ; fi

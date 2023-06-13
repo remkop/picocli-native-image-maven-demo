@@ -71,7 +71,7 @@ The current setup creates Linux, MacOS and Windows executables on TravisCI.
 == Installing GraalVM
 
 This project provides a `install-graal.sh` script to install GraalVM for Linux,
-and a `install-graal.bat` Windows version.
+and a `install-graal.cmd` Windows version.
 The Windows version will also attempt install the Windows Compiler Toolchain for the selected Java version via https://chocolatey.org/docs/installation[chocolatey] if it does not exist.
 
 The install script will cache the download and installation in `~/.m2/caches/info.picocli.graal`, so that subsequent invocations can reuse the previously downloaded GraalVM installation.
